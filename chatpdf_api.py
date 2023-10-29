@@ -101,39 +101,68 @@ class chatpdf_api:
         
         return response
 
+    def generate_reinforce(self, ):
+        pass
+
     def test_run(self):
-        tmp_api.debug()
+        self.debug()
         #tmp_api.upload_pdf("provided_file.pdf")
         
         if self.debug:
             print("Start: get topics")
-        topics = tmp_api.get_topics(5)
+        topics = self.get_topics(5)
         
         question = f"Give me a multiple choice question regarding the provided topics {topics} from the pdf file. {JSON_STYLE}."
-        tmp_rqst = tmp_api.create_prompt(question, rqst_sources=True)
+        tmp_rqst = self.create_prompt(question, rqst_sources=True)
 
-        tmp_api.ask_prompt(tmp_rqst)
+        self.ask_prompt(tmp_rqst)
 
 class any_api():
     def __init__(self, api_service=None) -> None:
         self.service = api_service
+        self.key = None
 
-    def init_question(self, profile, pdf, opt_context):
-        if os.path.isfile(pdf):
-            self.service = chatpdf_api()
+    def read_key(self, path):
+        try:
+            with open(path, 'r') as file:
+                return file.readline()
+        except:
+            print("ERROR: key file doesnt exist")
+
+    def init_question(self, profile, pdf_path, opt_context, key_path=""):
+        
+        self.key = self.read_key(key_path)
+        
+        if os.path.isfile(pdf_path):
+            self.service = chatpdf_api(pdf_path=pdf_path, key=self.key)
         else:
-            self.service = gpt_api()
+            self.service = gpt_api(self.key)
+
+        topics = self.service.get_topics(5)
+
+        question = profile + f"Give me a multiple choice question regarding the provided topics {topics} from the pdf file." + JSON_STYLE
+        tmp_query = self.service.create_prompt(question)
+        response = self.service.ask_prompt(tmp_query)
+
+        return {"topics": topics,
+                "response": response}
     
     def reinfoce_topic(self, topic=""):
         # generate more questions about a given topic
-        pass
+        pass    
     
     def reinfoce_auto(self):
         # generate more questions by default
-        pass
+        raise NotImplemented
+    
+    def adjust_difficulty_topic(topics):
+        raise NotImplemented
+    
+    def keep_going():
+        raise NotImplemented
 
-tmp_api = chatpdf_api(pdf_path="provided_file.pdf", key_path="chatpdf_key.txt")
-tmp_api.test_run()
+# tmp_api = chatpdf_api(pdf_path="provided_file.pdf", key_path="chatpdf_key.txt")
+# tmp_api.test_run()
 
 # comes from front end
 profile_background = "junior developer"
@@ -144,4 +173,4 @@ opt_context = ""
 
 # run question creator
 our_api = any_api()
-our_api.init_question(profile=profile, pdf_path=pdf, opt_context=opt_context)
+our_api.init_question(profile=profile, pdf_path=pdf, opt_context=opt_context, key_path="chatpdf_key.txt")
