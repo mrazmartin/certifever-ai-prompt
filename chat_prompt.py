@@ -17,7 +17,7 @@ JSON_STYLE = """Provide the results in the following json format:
         "DDD"
       ],
     "correct_answer": 2,
-    "explanation": short explanation of the correct answer
+    "explanation": short explanation of the correct answer 
 """
 
 class gpt_api:
@@ -29,7 +29,7 @@ class gpt_api:
         if key:
             self.key = key
 
-        _ = load_dotenv(find_dotenv())
+        # _ = load_dotenv(find_dotenv())
 
     def read_key_from_file(self, file_name="api_key.txt"):
         with open(file_name, 'r') as file:
